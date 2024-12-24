@@ -1,0 +1,33 @@
+[[api]]
+name = "Basic Information"
+url = "https://restapi.credinform.ru/api/CompanyInformation/BasicInformation"
+
+[api.headers]
+accessKey = "ee7f1f04-8716-4544-96d4-f9de28f073ab"
+Content-Type = "application/json"
+Accept = "application/json"
+
+[api.params]
+apiVersion = "1.9"
+
+[api.body]
+companyId = "b6a174fb-4f1d-4791-800c-c6b86711ad57"
+language = "Russian"
+
+[[api]]
+name = "Test API 2"
+url = "https://api.test2.com/v2"
+
+[api.headers]
+Authorization = "Bearer test-token-2"
+Content-Type = "application/json"
+X-API-Key = "test-api-key-2"
+
+[api.params]
+accessKey = "ee7f1f04-8716-4544-96d4-f9de28f073ab"
+apiVersion = "1.9"
+
+[api.body]
+client_id = "test2"
+limit = 100
+offset = 0

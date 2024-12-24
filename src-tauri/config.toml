@@ -1,6 +1,6 @@
 [[api]]
 name = "Basic Information"
-url = "https://restapi.credinform.ru/api/CompanyInformation/BasicInformation"
+url = "/CompanyInformation/BasicInformation"
 
 [api.headers]
 accessKey = "ee7f1f04-8716-4544-96d4-f9de28f073ab"

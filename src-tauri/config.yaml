@@ -1,0 +1,94 @@
+sources:
+  - name: Credinform
+    base_url: https://restapi.credinform.ru/api
+    username: Dmitry.Khokhlovkin@uralchem.com
+    password: "123456"
+    endpoints:
+      - name: Balance Sheets
+        url: /CompanyInformation/BalanceSheets
+        headers: {}
+        params:
+          apiVersion: "1.9"
+        body:
+          isWithExtendedForms: false
+          period:
+            from: "2020-01-01T00:00:00"
+            to: "2024-12-25T12:21:09.2176821+03:00"
+
+      - name: Banks
+        url: /CompanyInformation/Banks
+        headers: {}
+        params:
+          apiVersion: "1.9"
+        body: {}
+
+      - name: Basic Information
+        url: /CompanyInformation/BasicInformation
+        headers: {}
+        params:
+          apiVersion: "1.9"
+        body: {}
+
+      - name: Certificates
+        url: /CompanyInformation/Certificates
+        headers: {}
+        params:
+          apiVersion: "1.9"
+        body:
+          statuses:
+            - Active
+            - Suspended
+            - Canceled
+            - Arhive
+          partyTypes:
+            - Applicant
+            - Manufacturer
+          sort: DESC
+          offset: 0
+          limit: 100
+
+      - name: Contacts
+        url: /CompanyInformation/Contacts
+        headers: {}
+        params:
+          apiVersion: "1.9"
+        body: {}
+
+      - name: Patents
+        url: /CompanyInformation/Patents
+        headers: {}
+        params:
+          apiVersion: "1.9"
+        body:
+          sides:
+            - Inventor
+            - PatentHolder
+          statuses:
+            - Active
+            - Lapsed
+          sort: DESC
+          offset: 0
+          limit: 100
+
+      - name: Search Company
+        url: /Search/SearchCompany
+        headers: {}
+        params:
+          apiVersion: "1.9"
+        body:
+          searchCompanyParameters:
+            taxNumber: "7838368395"
+
+  - name: Example API
+    base_url: https://api.example.com
+    username: user
+    password: pass
+    endpoints:
+      - name: Get Users
+        url: /users
+        headers:
+          Content-Type: application/json
+        params:
+          version: "2.0"
+        body:
+          limit: 10

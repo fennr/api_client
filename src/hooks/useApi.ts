@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { invoke } from "@tauri-apps/api/core";
-import { type ApiConfig } from '../types/config';
 import { type RequestParams } from '../types/types';
 
 export const useApi = () => {

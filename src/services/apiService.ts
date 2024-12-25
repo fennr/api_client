@@ -10,25 +10,25 @@ export class ApiService {
     return this.isCredinformSource(source.name) && api.name !== API_ENDPOINTS.SEARCH_COMPANY;
   }
 
-  static prepareRequestBody(source: Source, api: ApiConfig, body: any, companyId?: string): any {
-    if (this.isCredinformSource(source.name) && companyId) {
-      return {
-        ...body,
-        companyId,
-        language: "Russian",
-      };
-    }
-    return body;
-  }
 
-  static validateRequest(source: Source | null, api: ApiConfig | null, requestBody: string): boolean {
-    if (!source || !api || !requestBody.trim()) return false;
+  static validateRequest(
+    source: Source | null, 
+    api: ApiConfig | null, 
+    requestBody: string
+  ): { isValid: boolean; parsedBody?: Record<string, unknown> } {
+    if (!source || !api || !requestBody.trim()) {
+      return { isValid: false };
+    }
 
     try {
-      JSON.parse(requestBody);
-      return true;
+      const parsedBody = JSON.parse(requestBody) as Record<string, unknown>;
+      return { isValid: true, parsedBody };
     } catch {
-      return false;
+      return { isValid: false };
     }
+  }
+
+  static formatRequestBody(body: Record<string, unknown>): string {
+    return JSON.stringify(body, null, 2);
   }
 }

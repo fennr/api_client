@@ -126,11 +126,11 @@ impl Client {
 async fn read_config() -> Result<Config, String> {
     let current_dir = std::env::current_dir()
         .map_err(|e| e.to_string())?;
-    let config_path = current_dir.join("config.toml");
+    let config_path = current_dir.join("config.yaml");  // Изменено с config.toml
 
     let config_content = fs::read_to_string(config_path)
         .map_err(|e| e.to_string())?;
-    let config: Config = toml::from_str(&config_content)
+    let config: Config = serde_yaml::from_str(&config_content)  // Изменено с toml::from_str
         .map_err(|e| e.to_string())?;
 
     Ok(config)

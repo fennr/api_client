@@ -1,91 +1,75 @@
-[[api]]
+[[sources]]
+name = "Credinform"
+base_url = "https://restapi.credinform.ru/api"
+username = "Dmitry.Khokhlovkin@uralchem.com"
+password = "123456"
+
+[[sources.endpoints]]
 name = "Search Company"
 url = "/Search/SearchCompany"
-[api.headers]
-
-[api.params]
+[sources.endpoints.headers]
+[sources.endpoints.params]
 apiVersion = "1.9"
-
-[api.body]
-
-[api.body.searchCompanyParameters]
+[sources.endpoints.body]
+[sources.endpoints.body.searchCompanyParameters]
 taxNumber = "7838368395"
 
-[[api]]
+[[sources.endpoints]]
 name = "Balance Sheets"
 url = "/CompanyInformation/BalanceSheets"
-
-[api.headers]
-
-[api.params]
+[sources.endpoints.headers]
+[sources.endpoints.params]
 apiVersion = "1.9"
-
-[api.body]
+[sources.endpoints.body]
 isWithExtendedForms = false
-
-[api.body.period]
+[sources.endpoints.body.period]
 from = "2020-01-01T00:00:00"
 to = "2024-12-25T12:21:09.2176821+03:00"
 
-[[api]]
+[[sources.endpoints]]
 name = "Banks"
 url = "/CompanyInformation/Banks"
-
-[api.headers]
-
-[api.params]
+[sources.endpoints.headers]
+[sources.endpoints.params]
 apiVersion = "1.9"
+[sources.endpoints.body]
 
-[api.body]
-
-[[api]]
+[[sources.endpoints]]
 name = "Contacts"
 url = "/CompanyInformation/Contacts"
-
-[api.headers]
-
-[api.params]
+[sources.endpoints.headers]
+[sources.endpoints.params]
 apiVersion = "1.9"
+[sources.endpoints.body]
 
-[api.body]
-
-[[api]]
+[[sources.endpoints]]
 name = "Basic Information"
 url = "/CompanyInformation/BasicInformation"
-
-[api.headers]
-
-[api.params]
+[sources.endpoints.headers]
+[sources.endpoints.params]
 apiVersion = "1.9"
+[sources.endpoints.body]
 
-[api.body]
-
-[[api]]
+[[sources.endpoints]]
 name = "Certificates"
 url = "/CompanyInformation/Certificates"
-
-[api.headers]
-
-[api.params]
+[sources.endpoints.headers]
+[sources.endpoints.params]
 apiVersion = "1.9"
-
-[api.body]
+[sources.endpoints.body]
 statuses = [ "Active", "Suspended", "Canceled", "Arhive" ]
 partyTypes = [ "Applicant", "Manufacturer" ]
 sort = "DESC"
 offset = 0
 limit = 100
 
-[[api]]
+[[sources.endpoints]]
 name = "Patents"
 url = "/CompanyInformation/Patents"
-
-[api.headers]
-
-[api.params]
+[sources.endpoints.headers]
+[sources.endpoints.params]
 apiVersion = "1.9"
-
-[api.body]
+[sources.endpoints.body]
 sides = [ "Inventor", "PatentHolder" ]
 statuses = [ "Active", "Lapsed" ]
 sort = "DESC"
@@ -94,3 +78,19 @@ limit = 100
 
 [registrationDateRange]
 from = "2024-01-01T00:00:00"
+
+[[sources]]
+name = "Example API"
+base_url = "https://api.example.com"
+username = "user"
+password = "pass"
+
+[[sources.endpoints]]
+name = "Get Users"
+url = "/users"
+[sources.endpoints.headers]
+Content-Type = "application/json"
+[sources.endpoints.params]
+version = "2.0"
+[sources.endpoints.body]
+limit = 10

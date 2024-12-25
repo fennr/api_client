@@ -10,10 +10,19 @@ fn greet(name: &str) -> String {
 
 #[derive(Debug, Serialize, Deserialize)]
 struct Config {
-    api: Vec<ApiConfig>,
+    sources: Vec<Source>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+struct Source {
+    name: String,
+    base_url: String,
+    username: String,
+    password: String,
+    endpoints: Vec<ApiConfig>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
 struct ApiConfig {
     name: String,
     url: String,
@@ -74,11 +83,12 @@ impl Client {
         Ok(auth_data.accessKey)
     }
 
-    async fn execute_request(&self, mut api: ApiConfig, access_key: String) -> Result<String, String> {
-        api.headers.insert("accessKey".to_string(), access_key);
+    async fn execute_request(&self, mut api: ApiConfig, access_key: Option<String>) -> Result<String, String> {
+        if let Some(ref key) = access_key {
+            api.headers.insert("accessKey".to_string(), key.to_string());
+        }
 
-        let url = format!("https://restapi.credinform.ru/api{}", api.url);
-        let mut request = self.http_client.request(reqwest::Method::POST, &url);
+        let mut request = self.http_client.request(reqwest::Method::POST, &api.url);
 
         // Add headers
         for (key, value) in &api.headers {
@@ -126,16 +136,32 @@ async fn read_config() -> Result<Config, String> {
     Ok(config)
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+struct RequestConfig {
+    source: String,
+    api: ApiConfig,
+    useAuth: bool,  // переименовано с use_auth на useAuth
+}
+
 #[tauri::command]
-async fn make_request(api: ApiConfig) -> Result<String, String> {
+async fn make_request(source: String, api: ApiConfig, useAuth: bool) -> Result<String, String> {
+    let config = read_config().await?;
+    let source_config = config.sources.iter()
+        .find(|s| s.name == source)
+        .ok_or_else(|| "Source not found".to_string())?;
+    
     let client = Client::new();
     
-    // Получаем токен доступа
-    let access_key = client.authenticate("Dmitry.Khokhlovkin@uralchem.com", "123456").await?;
-    println!("{}", access_key);
-    
-    // Выполняем запрос с полученным токеном
-    client.execute_request(api, access_key).await
+    if useAuth {
+        let access_key = client.authenticate(&source_config.username, &source_config.password).await?;
+        let mut full_api = api.clone();
+        full_api.url = format!("{}{}", source_config.base_url, api.url);
+        client.execute_request(full_api, Some(access_key)).await
+    } else {
+        let mut full_api = api.clone();
+        full_api.url = format!("{}{}", source_config.base_url, api.url);
+        client.execute_request(full_api, None).await
+    }
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]

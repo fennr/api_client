@@ -85,7 +85,7 @@ button {
   margin: 0 auto;
   padding: clamp(0.8rem, 1.5vw, 1.2rem);
   font-size: calc(1em + 0.1vw);
-  background-color: #646cff;
+  background-color: #3883fa;
   color: white;
   border: none;
   border-radius: 4px;
@@ -123,5 +123,21 @@ button:disabled {
 .jsoneditor-menu {
   background-color: #f8f8f8;
   border-bottom: 1px solid #ddd;
+}
+
+.auth-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.auth-checkbox input[type="checkbox"] {
+  margin: 0;
+}
+
+.auth-checkbox label {
+  margin: 0;
+  font-weight: normal;
 }
 

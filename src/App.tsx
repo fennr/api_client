@@ -125,7 +125,7 @@ function App() {
         {/* Request Body Editor */}
         <div className="input-group">
           <label>Request Body:</label>
-          <div style={{ height: '150px' }}>
+          <div style={{ height: '180px' }}>  
             <JsonEditor
               data={requestBody}
               onChange={setRequestBody}

@@ -14,7 +14,7 @@
   min-height: calc(100vh - 2rem);
   display: flex;
   flex-direction: column;
-  overflow: auto;
+  overflow: hidden; /* Изменено с auto на hidden */
 }
 
 h1 {
@@ -25,8 +25,8 @@ h1 {
 
 .api-form {
   flex: 1;
-  width: 100%;
-  max-width: 1400px;
+  width: calc(100% - 2rem); /* Добавлен отступ с обеих сторон */
+  max-width: 1200px; /* Уменьшен с 1400px */
   margin: 1rem auto;  /* Изменено с margin: 0 auto */
   padding: 1rem;
   background-color: #ffffff;
@@ -40,6 +40,18 @@ h1 {
 
 .input-group {
   margin-bottom: 1rem;
+}
+
+.input-group.with-editor {
+  flex: 1;
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+}
+
+.input-group.with-editor > div {
+  flex: 1;
+  min-height: 0;
 }
 
 .input-group label {

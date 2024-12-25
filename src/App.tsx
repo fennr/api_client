@@ -1,25 +1,60 @@
 import { useState, useEffect } from "react";
-import reactLogo from "./assets/react.svg";
 import { invoke } from "@tauri-apps/api/core";
 import { type Config, type ApiConfig } from "./types/config";
 import "./App.css";
 
 function App() {
-  const [greetMsg, setGreetMsg] = useState("");
-  const [name, setName] = useState("");
   const [apis, setApis] = useState<ApiConfig[]>([]);
   const [selectedApi, setSelectedApi] = useState<ApiConfig | null>(null);
+  const [companyId, setCompanyId] = useState<string>("");
+  const [requestBody, setRequestBody] = useState<string>("");
   const [response, setResponse] = useState<string>("");
 
-  async function greet() {
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-    setGreetMsg(await invoke("greet", { name }));
-  }
+  useEffect(() => {
+    const loadConfig = async () => {
+      try {
+        const config = await invoke<Config>("read_config");
+        setApis(config.api);
+      } catch (error) {
+        console.error('Error loading config:', error);
+      }
+    };
+    loadConfig();
+  }, []);
+
+  const handleApiSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selected = apis.find(api => api.name === e.target.value);
+    setSelectedApi(selected || null);
+    if (selected) {
+      setRequestBody(JSON.stringify(selected.body, null, 2));
+    }
+    setResponse("");
+  };
 
   const handleRequest = async () => {
-    if (!selectedApi) return;
+    if (!selectedApi || !companyId || !requestBody) return;
+    
     try {
-      const result = await invoke<string>("make_request", { api: selectedApi });
+      let bodyJson;
+      try {
+        bodyJson = JSON.parse(requestBody);
+      } catch (e) {
+        setResponse('Error: Invalid JSON in request body');
+        return;
+      }
+
+      // Создаем обновленную конфигурацию API
+      const updatedApi = {
+        ...selectedApi,
+        headers: {
+          ...selectedApi.headers,
+          companyId: companyId // добавляем companyId в headers
+        },
+        body: bodyJson // обновляем тело запроса
+      };
+      
+      console.log('Sending request with config:', updatedApi);
+      const result = await invoke<string>("make_request", { api: updatedApi });
       setResponse(result);
     } catch (error) {
       console.error('Error making request:', error);
@@ -27,101 +62,69 @@ function App() {
     }
   };
 
-  const formatResponse = (response: string) => {
-    try {
-      const jsonData = JSON.parse(response);
-      return JSON.stringify(jsonData, null, 2);
-    } catch {
-      return response;
-    }
-  };
-
-  useEffect(() => {
-    const loadConfig = async () => {
-      try {
-        const config = await invoke<Config>("read_config");
-        console.log('Loaded configuration:', config);  // добавляем лог
-        setApis(config.api);
-      } catch (error) {
-        console.error('Error loading config:', error);
-      }
-    };
-
-    loadConfig();
-  }, []);
+  const isRequestEnabled = selectedApi && companyId.trim() && requestBody.trim();
 
   return (
     <main className="container">
-      <h1>Welcome to Tauri + React</h1>
-
-      <div className="row">
-        <a href="https://vitejs.dev" target="_blank">
-          <img src="/vite.svg" className="logo vite" alt="Vite logo" />
-        </a>
-        <a href="https://tauri.app" target="_blank">
-          <img src="/tauri.svg" className="logo tauri" alt="Tauri logo" />
-        </a>
-        <a href="https://reactjs.org" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <p>Click on the Tauri, Vite, and React logos to learn more.</p>
-
-      <form
-        className="row"
-        onSubmit={(e) => {
-          e.preventDefault();
-          greet();
-        }}
-      >
-        <input
-          id="greet-input"
-          onChange={(e) => setName(e.currentTarget.value)}
-          placeholder="Enter a name..."
-        />
-        <button type="submit">Greet</button>
-      </form>
-      <p>{greetMsg}</p>
-
-      <div className="api-selector">
-        <div className="api-select-row">
+      <h1>API Client</h1>
+      
+      <div className="api-form">
+        <div className="input-group">
+          <label>Select API:</label>
           <select 
-            className="api-select"
             value={selectedApi?.name || ""} 
-            onChange={(e) => {
-              const selected = apis.find(api => api.name === e.target.value);
-              setSelectedApi(selected || null);
-              setResponse(""); // Clear previous response
-            }}
+            onChange={handleApiSelect}
           >
-            <option value="">Выберите API</option>
+            <option value="">Choose API...</option>
             {apis.map(api => (
               <option key={api.name} value={api.name}>
                 {api.name}
               </option>
             ))}
           </select>
-          <button type="submit"
-            onClick={handleRequest}
-            disabled={!selectedApi}
-          >
-            Request
-          </button>
         </div>
-        
-        {selectedApi && (
-          <div className="api-info">
-            <p>URL: {selectedApi.url}</p>
-            <p>Headers: {JSON.stringify(selectedApi.headers, null, 2)}</p>
-            <p>Params: {JSON.stringify(selectedApi.params, null, 2)}</p>
-            <p>Body: {JSON.stringify(selectedApi.body, null, 2)}</p>
-          </div>
-        )}
+
+        <div className="input-group">
+          <label>Company ID:</label>
+          <input
+            type="text"
+            value={companyId}
+            onChange={(e) => setCompanyId(e.target.value)}
+            placeholder="Enter Company ID..."
+          />
+        </div>
+
+        <div className="input-group">
+          <label>Request Body:</label>
+          <textarea
+            value={requestBody}
+            onChange={(e) => setRequestBody(e.target.value)}
+            rows={5}  
+            placeholder="Enter request body..."
+          />
+        </div>
+
+        <button 
+          onClick={handleRequest}
+          disabled={!isRequestEnabled}
+        >
+          Send Request
+        </button>
 
         {response && (
-          <div className="api-response">
-            <h3>Response:</h3>
-            <pre>{formatResponse(response)}</pre>
+          <div className="input-group">
+            <label>Response:</label>
+            <textarea
+              value={(() => {
+                try {
+                  return JSON.stringify(JSON.parse(response), null, 2);
+                } catch {
+                  return response;
+                }
+              })()}
+              readOnly
+              rows={20}
+            />
           </div>
         )}
       </div>

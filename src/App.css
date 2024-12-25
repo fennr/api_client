@@ -1,90 +1,71 @@
 :root {
   font-family: "Segoe UI", Tahoma, sans-serif;
-  font-size: calc(14px); /* Динамический размер шрифта */
+  font-size: 14px;
   color: #000000;
   background-color: #f6f6f6;
 }
 
 .container {
-  margin: 0 auto;
-  padding: clamp(1rem, 2vw, 2rem);
+  box-sizing: border-box;
+  margin: 0;
+  padding: 1rem;
   width: 100%;
   min-width: 320px;
-  min-height: 100vh;
+  min-height: calc(100vh - 2rem);
   display: flex;
   flex-direction: column;
-  box-sizing: border-box;
-  overflow-x: hidden;
+  overflow: auto;
 }
 
 h1 {
   text-align: center;
-  margin-bottom: clamp(1.5rem, 3vw, 2.5rem);
-  font-size: clamp(1.5rem, 2.5vw, 2rem);
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
 }
 
 .api-form {
   flex: 1;
   width: 100%;
   max-width: 1400px;
-  margin: 0 auto;
-  padding: clamp(1rem, 2vw, 2rem);
+  margin: 1rem auto;  /* Изменено с margin: 0 auto */
+  padding: 1rem;
   background-color: #ffffff;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
-  gap: clamp(1rem, 2vw, 1.5rem);
+  gap: 1rem;
+  margin-bottom: 1rem; /* Добавляем отступ снизу */
 }
 
 .input-group {
-  margin-bottom: clamp(1rem, 2vw, 1.5rem);
+  margin-bottom: 1rem;
 }
 
 .input-group label {
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 500;
-  font-size: calc(1em + 0.1vw);
 }
 
 .input-group select,
-.input-group input,
-.input-group textarea {
+.input-group input {
   width: 100%;
   min-width: 200px;
   max-width: 100%;
-  padding: clamp(0.5rem, 1vw, 0.8rem);
+  padding: 0.5rem;
   border: 1px solid #ddd;
   border-radius: 4px;
   background: #ffffff;
-  font-size: calc(1em + 0.1vw);
   box-sizing: border-box;
-}
-
-.input-group textarea {
-  font-family: Consolas, monospace;
-  resize: vertical;
-  overflow-y: auto;
-  line-height: 1.4;
-  min-height: clamp(30px, 15vh, 200px); /* уменьшаем высоту для обычных textarea */
-  max-height: 60vh;
-}
-
-.input-group select {
-  height: clamp(2.5rem, 5vh, 3rem);
-}
-
-.input-group input {
-  height: clamp(2rem, 4vh, 2.5rem);
+  height: 2.5rem;
 }
 
 button {
   width: 100%;
   max-width: 300px;
   margin: 0 auto;
-  padding: clamp(0.8rem, 1.5vw, 1.2rem);
-  font-size: calc(1em + 0.1vw);
+  padding: 0.8rem;
   background-color: #3883fa;
   color: white;
   border: none;
@@ -94,23 +75,7 @@ button {
 
 button:disabled {
   background-color: #cccccc;
-}
-
-.input-group textarea[readonly] {
-  background-color: #f8f8f8;
-  cursor: text;
-  min-height: clamp(300px, 60vh, 800px); /* увеличиваем высоту для readonly textarea */
-  max-height: 80vh;
-}
-
-.response-group {
-  flex: 1;
-  min-height: 400px;
-}
-
-.jsoneditor-container {
-  height: 100%;
-  min-height: 400px;
+  cursor: not-allowed;
 }
 
 /* Переопределяем стили jsoneditor для соответствия нашей теме */
@@ -123,21 +88,5 @@ button:disabled {
 .jsoneditor-menu {
   background-color: #f8f8f8;
   border-bottom: 1px solid #ddd;
-}
-
-.auth-checkbox {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 16px;
-}
-
-.auth-checkbox input[type="checkbox"] {
-  margin: 0;
-}
-
-.auth-checkbox label {
-  margin: 0;
-  font-weight: normal;
 }
 

@@ -1,6 +1,6 @@
 :root {
   font-family: "Segoe UI", Tahoma, sans-serif;
-  font-size: calc(14px + 0.2vw); /* Динамический размер шрифта */
+  font-size: calc(14px); /* Динамический размер шрифта */
   color: #000000;
   background-color: #f6f6f6;
 }

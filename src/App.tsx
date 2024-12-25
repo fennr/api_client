@@ -6,7 +6,7 @@ import "./App.css";
 function App() {
   const [apis, setApis] = useState<ApiConfig[]>([]);
   const [selectedApi, setSelectedApi] = useState<ApiConfig | null>(null);
-  const [companyId, setCompanyId] = useState<string>("");
+  const [companyId, setCompanyId] = useState<string>("b6a174fb-4f1d-4791-800c-c6b86711ad57");
   const [requestBody, setRequestBody] = useState<string>("");
   const [response, setResponse] = useState<string>("");
 
@@ -42,16 +42,23 @@ function App() {
         setResponse('Error: Invalid JSON in request body');
         return;
       }
-
-      // Создаем обновленную конфигурацию API
-      const updatedApi = {
+      let updatedApi = {
         ...selectedApi,
-        headers: {
-          ...selectedApi.headers,
-          companyId: companyId // добавляем companyId в headers
-        },
-        body: bodyJson // обновляем тело запроса
+        body: bodyJson,
       };
+
+      if (selectedApi.name !== "Search Company") {
+        // Создаем обновленную конфигурацию API
+        updatedApi = {
+          ...selectedApi,
+          headers: selectedApi.headers,
+          body: {
+            ...bodyJson,
+            companyId: companyId,
+            "language": "Russian",
+          },
+        };
+      } 
       
       console.log('Sending request with config:', updatedApi);
       const result = await invoke<string>("make_request", { api: updatedApi });
@@ -62,7 +69,8 @@ function App() {
     }
   };
 
-  const isRequestEnabled = selectedApi && companyId.trim() && requestBody.trim();
+  // const isRequestEnabled = selectedApi && companyId.trim() && requestBody.trim();
+  const isRequestEnabled = selectedApi;
 
   return (
     <main className="container">

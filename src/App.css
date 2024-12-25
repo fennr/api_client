@@ -103,3 +103,25 @@ button:disabled {
   max-height: 80vh;
 }
 
+.response-group {
+  flex: 1;
+  min-height: 400px;
+}
+
+.jsoneditor-container {
+  height: 100%;
+  min-height: 400px;
+}
+
+/* Переопределяем стили jsoneditor для соответствия нашей теме */
+.jsoneditor {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  height: 100%;
+}
+
+.jsoneditor-menu {
+  background-color: #f8f8f8;
+  border-bottom: 1px solid #ddd;
+}
+

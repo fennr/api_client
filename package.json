@@ -13,6 +13,8 @@
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-fs": "~2",
     "@tauri-apps/plugin-opener": "^2",
+    "@types/jsoneditor": "^9.9.5",
+    "jsoneditor": "^10.1.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },

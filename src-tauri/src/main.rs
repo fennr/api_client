@@ -2,5 +2,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-    credinform_app_lib::run()
+    api_client_lib::run()
 }

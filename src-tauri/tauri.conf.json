@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "credinform-app",
+  "productName": "api_client",
   "version": "0.1.0",
-  "identifier": "com.credinform-app.app",
+  "identifier": "com.api_client.app",
   "build": {
     "beforeDevCommand": "bun run dev",
     "devUrl": "http://localhost:1420",
@@ -12,9 +12,9 @@
   "app": {
     "windows": [
       {
-        "title": "credinform-app",
-        "width": 1024,
-        "height": 768 
+        "title": "api_client",
+        "width": 800,
+        "height": 640 
       }
     ],
     "security": {

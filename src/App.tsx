@@ -48,7 +48,7 @@ function App() {
 
     try {
       const result = await makeRequest({
-        source: selectedSource!.name,
+        source: selectedSource!,
         selectedApi: selectedApi!,
         companyId,
         requestBody,

@@ -1,4 +1,4 @@
-import { type ApiConfig } from './config';
+import { type ApiConfig, type Source } from './config';
 
 export interface ApiSelectorProps {
   apis: ApiConfig[];
@@ -29,7 +29,7 @@ export interface ResponseViewerProps {
 }
 
 export interface RequestParams {
-  source: string;
+  source: Source;  // Изменено с string на Source
   selectedApi: ApiConfig;
   companyId?: string;
   requestBody: string;

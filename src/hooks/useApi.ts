@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { invoke } from "@tauri-apps/api/core";
 import { type RequestParams } from '../types/types';
+import { ApiService } from '../services/apiService';
 
 export const useApi = () => {
   const [requestInProgress, setRequestInProgress] = useState(false);
@@ -15,22 +16,23 @@ export const useApi = () => {
     try {
       const bodyJson = JSON.parse(requestBody);
       let updatedApi = { ...selectedApi };
-
+      let command = "";
       // Добавляем companyId только для Credinform API
-      if (source === 'Credinform' && companyId) {
+      if (ApiService.needsCompanyId(source, selectedApi)) {
         updatedApi.body = {
           ...bodyJson,
           companyId,
           language: "Russian",
         };
+        command = "make_credinform_request";
       } else {
         updatedApi.body = bodyJson;
+        command = "make_request";
       }
 
-      return await invoke<string>("make_request", { 
-        source,
+      return await invoke<string>(command, {
+        source: source.name,
         api: updatedApi,
-        useAuth: true  // параметр переименован с use_auth на useAuth
       });
     } finally {
       setRequestInProgress(false);

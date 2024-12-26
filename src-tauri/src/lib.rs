@@ -1,6 +1,6 @@
+use reqwest;
 use serde::{Deserialize, Serialize};
 use std::fs;
-use reqwest;
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
@@ -63,7 +63,8 @@ impl Client {
             password: password.to_string(),
         };
 
-        let auth_response = self.http_client
+        let auth_response = self
+            .http_client
             .post("https://restapi.credinform.ru/api/Authorization/GetAccessKey")
             .json(&auth_request)
             .send()
@@ -71,19 +72,26 @@ impl Client {
             .map_err(|e| e.to_string())?;
 
         if !auth_response.status().is_success() {
-            return Err(format!("Auth failed with status: {}", auth_response.status()));
+            return Err(format!(
+                "Auth failed with status: {}",
+                auth_response.status()
+            ));
         }
 
-        let auth_data: AuthResponse = auth_response
-            .json()
-            .await
-            .map_err(|e| e.to_string())?;
+        let auth_data: AuthResponse = auth_response.json().await.map_err(|e| e.to_string())?;
 
-        println!("Authorized successfully, access key: {}", auth_data.accessKey);
+        println!(
+            "Authorized successfully, access key: {}",
+            auth_data.accessKey
+        );
         Ok(auth_data.accessKey)
     }
 
-    async fn execute_request(&self, mut api: ApiConfig, access_key: Option<String>) -> Result<String, String> {
+    async fn execute_request(
+        &self,
+        mut api: ApiConfig,
+        access_key: Option<String>,
+    ) -> Result<String, String> {
         if let Some(ref key) = access_key {
             api.headers.insert("accessKey".to_string(), key.to_string());
         }
@@ -107,15 +115,9 @@ impl Client {
 
         println!("Making request: {:?}", request);
 
-        let response = request
-            .send()
-            .await
-            .map_err(|e| e.to_string())?;
+        let response = request.send().await.map_err(|e| e.to_string())?;
 
-        let response_text = response
-            .text()
-            .await
-            .map_err(|e| e.to_string())?;
+        let response_text = response.text().await.map_err(|e| e.to_string())?;
 
         println!("Response received: {}", response_text);
         Ok(response_text)
@@ -124,13 +126,11 @@ impl Client {
 
 #[tauri::command]
 async fn read_config() -> Result<Config, String> {
-    let current_dir = std::env::current_dir()
-        .map_err(|e| e.to_string())?;
-    let config_path = current_dir.join("config.yaml");  // Изменено с config.toml
+    let current_dir = std::env::current_dir().map_err(|e| e.to_string())?;
+    let config_path = current_dir.join("config.yaml"); // Изменено с config.toml
 
-    let config_content = fs::read_to_string(config_path)
-        .map_err(|e| e.to_string())?;
-    let config: Config = serde_yaml::from_str(&config_content)  // Изменено с toml::from_str
+    let config_content = fs::read_to_string(config_path).map_err(|e| e.to_string())?;
+    let config: Config = serde_yaml::from_str(&config_content) // Изменено с toml::from_str
         .map_err(|e| e.to_string())?;
 
     Ok(config)
@@ -140,28 +140,44 @@ async fn read_config() -> Result<Config, String> {
 struct RequestConfig {
     source: String,
     api: ApiConfig,
-    useAuth: bool,  // переименовано с use_auth на useAuth
+    use_auth: bool,
 }
 
 #[tauri::command]
-async fn make_request(source: String, api: ApiConfig, useAuth: bool) -> Result<String, String> {
+async fn make_credinform_request(
+    source: String,
+    api: ApiConfig,
+) -> Result<String, String> {
     let config = read_config().await?;
-    let source_config = config.sources.iter()
+    let source_config = config
+        .sources
+        .iter()
         .find(|s| s.name == source)
         .ok_or_else(|| "Source not found".to_string())?;
-    
+
     let client = Client::new();
-    
-    if useAuth {
-        let access_key = client.authenticate(&source_config.username, &source_config.password).await?;
-        let mut full_api = api.clone();
-        full_api.url = format!("{}{}", source_config.base_url, api.url);
-        client.execute_request(full_api, Some(access_key)).await
-    } else {
-        let mut full_api = api.clone();
-        full_api.url = format!("{}{}", source_config.base_url, api.url);
-        client.execute_request(full_api, None).await
-    }
+    let access_key = client
+        .authenticate(&source_config.username, &source_config.password)
+        .await?;
+    let mut full_api = api.clone();
+    full_api.url = format!("{}{}", source_config.base_url, api.url);
+    client.execute_request(full_api, Some(access_key)).await
+}
+
+#[tauri::command]
+async fn make_request(source_name: String, api: ApiConfig) -> Result<String, String> {
+    let config = read_config().await?;
+    let source_config = config
+        .sources
+        .iter()
+        .find(|s| s.name == source_name)
+        .ok_or_else(|| "Source not found".to_string())?;
+
+    let client = Client::new();
+
+    let mut full_api = api.clone();
+    full_api.url = format!("{}{}", source_config.base_url, api.url);
+    client.execute_request(full_api, None).await
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -169,7 +185,12 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![greet, read_config, make_request])
+        .invoke_handler(tauri::generate_handler![
+            greet,
+            read_config,
+            make_request,
+            make_credinform_request,
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

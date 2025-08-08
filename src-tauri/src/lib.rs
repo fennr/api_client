@@ -1,6 +1,8 @@
+use log::info;
 use reqwest;
 use serde::{Deserialize, Serialize};
 use std::fs;
+use std::path::PathBuf;
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
@@ -125,13 +127,64 @@ impl Client {
 }
 
 #[tauri::command]
-async fn read_config() -> Result<Config, String> {
-    let current_dir = std::env::current_dir().map_err(|e| e.to_string())?;
-    let config_path = current_dir.join("config.yaml"); // Изменено с config.toml
+async fn read_config(app: tauri::AppHandle) -> Result<Config, String> {
+    // Try to resolve config.yaml from several common locations, so it works in dev and prod:
+    // 1) current working directory (dev scenario)
+    // 2) directory of the executable (prod scenario, when config is placed next to .exe)
+    let mut candidate_paths: Vec<PathBuf> = Vec::new();
+
+    // 0) explicit override via env var
+    if let Ok(path_str) = std::env::var("API_CLIENT_CONFIG") {
+        candidate_paths.push(PathBuf::from(path_str));
+    }
+
+    if let Ok(current_dir) = std::env::current_dir() {
+        info!("Current working directory: {}", current_dir.display());
+        candidate_paths.push(current_dir.join("config.yaml"));
+        candidate_paths.push(current_dir.join("config.yml"));
+    }
+
+    if let Ok(exe_path) = std::env::current_exe() {
+        if let Some(exe_dir) = exe_path.parent() {
+            info!("Executable directory: {}", exe_dir.display());
+            candidate_paths.push(exe_dir.join("config.yaml"));
+            candidate_paths.push(exe_dir.join("config.yml"));
+            // common Tauri layout: resources next to exe
+            candidate_paths.push(exe_dir.join("resources").join("config.yaml"));
+            candidate_paths.push(exe_dir.join("resources").join("config.yml"));
+        }
+    }
+
+    // Optionally, also look one level up from the executable directory (some installers nest the exe)
+    if let Ok(exe_path) = std::env::current_exe() {
+        if let Some(parent_dir) = exe_path.parent().and_then(|p| p.parent()) {
+            candidate_paths.push(parent_dir.join("config.yaml"));
+            candidate_paths.push(parent_dir.join("config.yml"));
+        }
+    }
+
+    // 3) application config directory (e.g., %APPDATA% on Windows)
+    if let Some(proj_dirs) = directories::ProjectDirs::from("com", "api-client", "api_client") {
+        candidate_paths.push(proj_dirs.config_dir().join("config.yaml"));
+        candidate_paths.push(proj_dirs.config_dir().join("config.yml"));
+        candidate_paths.push(proj_dirs.preference_dir().join("config.yaml"));
+        candidate_paths.push(proj_dirs.preference_dir().join("config.yml"));
+        candidate_paths.push(proj_dirs.data_dir().join("config.yaml"));
+        candidate_paths.push(proj_dirs.data_dir().join("config.yml"));
+    }
+
+    let config_path = candidate_paths
+        .into_iter()
+        .find(|p| p.exists())
+        .ok_or_else(|| "config.yaml not found in expected locations".to_string())?;
+
+    info!("Using config at: {}", config_path.display());
 
     let config_content = fs::read_to_string(config_path).map_err(|e| e.to_string())?;
-    let config: Config = serde_yaml::from_str(&config_content) // Изменено с toml::from_str
-        .map_err(|e| e.to_string())?;
+    info!("Config content: {}", config_content);
+
+    let config: Config = serde_yaml::from_str(&config_content).map_err(|e| e.to_string())?;
+    info!("Config loaded successfully");
 
     Ok(config)
 }
@@ -145,10 +198,11 @@ struct RequestConfig {
 
 #[tauri::command]
 async fn make_credinform_request(
+    app: tauri::AppHandle,
     source: String,
     api: ApiConfig,
 ) -> Result<String, String> {
-    let config = read_config().await?;
+    let config = read_config(app.clone()).await?;
     let source_config = config
         .sources
         .iter()
@@ -165,8 +219,12 @@ async fn make_credinform_request(
 }
 
 #[tauri::command]
-async fn make_request(source_name: String, api: ApiConfig) -> Result<String, String> {
-    let config = read_config().await?;
+async fn make_request(
+    app: tauri::AppHandle,
+    source_name: String,
+    api: ApiConfig,
+) -> Result<String, String> {
+    let config = read_config(app.clone()).await?;
     let source_config = config
         .sources
         .iter()
@@ -183,6 +241,7 @@ async fn make_request(source_name: String, api: ApiConfig) -> Result<String, Str
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_log::Builder::default().build())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![

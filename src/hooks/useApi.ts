@@ -18,13 +18,15 @@ export const useApi = () => {
       let updatedApi = { ...selectedApi };
       let command = "";
       // Добавляем companyId только для Credinform API
-      if (ApiService.needsCompanyId(source, selectedApi)) {
-        updatedApi.body = {
-          ...bodyJson,
-          companyId,
-          language: "Russian",
-        };
+      if (ApiService.isCredinformSource(source.name)) {
         command = "make_credinform_request";
+        if (ApiService.needsCompanyId(source, selectedApi)) {
+          updatedApi.body = {
+            ...bodyJson,
+            companyId,
+            language: "Russian",
+          };
+        }
       } else {
         updatedApi.body = bodyJson;
         command = "make_request";

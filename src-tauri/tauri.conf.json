@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "api_client",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "identifier": "com.api-client.app",
   "build": {
     "beforeDevCommand": "bun run dev",
@@ -24,9 +24,6 @@
   "bundle": {
     "active": true,
     "targets": "all",
-    "resources": [
-      "../config.yaml"
-    ],
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",

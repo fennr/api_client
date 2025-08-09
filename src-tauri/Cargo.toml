@@ -1,6 +1,6 @@
 [package]
 name = "api_client"
-version = "0.1.2"
+version = "0.1.3"
 description = "App for work API's"
 authors = ["mr.fenrir@ya.ru"]
 edition = "2021"
